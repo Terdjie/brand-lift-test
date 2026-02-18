@@ -222,14 +222,17 @@ function renderKPIs(controlRows, treatmentRows) {
 }
 
 function renderTable(metricRows) {
-  const table = $("metricsTable");
+  const table = document.getElementById("metricsTable");
   if (!table) return;
 
-  const tbody = table.querySelector("tbody");
-  if (!tbody) return;
+  let tbody = table.querySelector("tbody");
+  if (!tbody) {
+    tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+  }
 
   tbody.innerHTML = metricRows.map(m => {
-    const confClass = m.confidence.toLowerCase(); // high/medium/low
+    const confClass = (m.confidence || "Low").toLowerCase(); // high/medium/low
     const confBadge = `<span class="badge ${confClass}">${m.confidence}</span>`;
     return `
       <tr>
