@@ -50,12 +50,21 @@ function sendBeaconGet(paramsObj) {
     // ✅ empêche double submit
     if (sendBtn.disabled) return;
 
-    const q1 = sanitize(document.getElementById("q1").value);
-    const q2 = sanitize(document.getElementById("q2").value);
+    // Q1 multi-select
+    const q1 = Array.from(document.querySelectorAll('input[name="q1"]:checked'))
+      .map(el => el.value)
+      .join(", ");
+
+    // Q2 single-select
+    const q2El = document.querySelector('input[name="q2"]:checked');
+    const q2 = q2El ? q2El.value : "";
+
+    // Q3 free text
     const q3 = sanitize(document.getElementById("q3").value);
 
+
     if (!q1 || !q2 || !q3) {
-      setStatus(status, "Merci de remplir les 3 réponses.", true);
+      setStatus(status, "Please answer all questions.", true);
       return;
     }
 

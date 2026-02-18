@@ -175,3 +175,21 @@ html, body {
 .footer { margin-top: 8px; display: flex; justify-content: space-between; }
 .hint { font-size: 11px; color: rgba(232, 238, 252, 0.55); }
 
+.options {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.options label {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.options input {
+  accent-color: #41d38a;
+}
+

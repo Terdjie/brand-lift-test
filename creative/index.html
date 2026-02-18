@@ -18,29 +18,61 @@
         <h1 class="title">3 quick questions</h1>
         <p class="subtitle">Answer in a few seconds.</p>
 
-        <form id="surveyForm" class="form" autocomplete="off">
-          <div class="field">
-            <label for="q1" class="label">1) What is your priority right now?</label>
-            <input id="q1" name="q1" type="text" class="input" maxlength="120" placeholder="Your answer…" />
-          </div>
+      <form id="surveyForm" class="form" autocomplete="off">
 
-          <div class="field">
-            <label for="q2" class="label">2) What product/services do you use the most?</label>
-            <input id="q2" name="q2" type="text" class="input" maxlength="120" placeholder="Your answer…" />
-          </div>
+        <!-- Q1 Multi-select -->
+        <div class="field">
+          <label class="label">
+            1) Which brand lift measurement provider(s) do you use or prefer?
+          </label>
 
-          <div class="field">
-            <label for="q3" class="label">3) What would save you time?</label>
-            <input id="q3" name="q3" type="text" class="input" maxlength="120" placeholder="Your answer…" />
+          <div class="options">
+            <label><input type="checkbox" name="q1" value="Kantar"> Kantar</label>
+            <label><input type="checkbox" name="q1" value="Nielsen"> Nielsen</label>
+            <label><input type="checkbox" name="q1" value="Ipsos"> Ipsos</label>
+            <label><input type="checkbox" name="q1" value="Dynata"> Dynata</label>
+            <label><input type="checkbox" name="q1" value="First-party"> First-party platform solution</label>
+            <label><input type="checkbox" name="q1" value="Other"> Other</label>
           </div>
+        </div>
 
-          <div class="actions">
-            <button id="sendBtn" class="btn" type="submit">Send</button>
-            <div id="status" class="status" aria-live="polite"></div>
+        <!-- Q2 Single select -->
+        <div class="field">
+          <label class="label">
+            2) What is your preferred approach?
+          </label>
+
+          <div class="options">
+            <label><input type="radio" name="q2" value="First-party"> First-party only</label>
+            <label><input type="radio" name="q2" value="Third-party"> Third-party only</label>
+            <label><input type="radio" name="q2" value="Hybrid"> Hybrid (both)</label>
+            <label><input type="radio" name="q2" value="No preference"> No strong preference</label>
           </div>
+        </div>
 
-          <p class="fineprint">By sending, your answers are stored anonymously.</p>
-        </form>
+        <!-- Q3 Free text -->
+        <div class="field">
+          <label for="q3" class="label">
+            3) What key outcomes are you looking to measure?
+          </label>
+          <input
+            id="q3"
+            name="q3"
+            type="text"
+            class="input"
+            maxlength="120"
+            placeholder="Brand awareness, ad recall, purchase intent…"
+          />
+        </div>
+
+        <div class="actions">
+          <button id="sendBtn" class="btn" type="submit">Send</button>
+          <div id="status" class="status" aria-live="polite"></div>
+        </div>
+
+        <p class="fineprint">By sending, your answers are stored anonymously.</p>
+      </form>
+
 
         <div id="thankYou" class="thankyou" hidden>
           <div class="check">✓</div>
