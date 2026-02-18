@@ -168,7 +168,7 @@
       placementId: 37217254,
       memberId: 958,
       size: [300, 600],
-      debug: false
+      debug: true
     };
   </script>
 </head>
@@ -277,50 +277,116 @@
     </div>
   </footer>
 
-  <script>
-    (function() {
-      var cfg = window.__XANDR_CONFIG || {};
-      var tries = 0;
-      var maxTries = 60; // ~6s
+<script>
+(function() {
 
-      function initAstTag() {
-        window.apntag = window.apntag || {};
-        window.apntag.anq = window.apntag.anq || [];
+  function qs(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
 
-        window.apntag.anq.push(function() {
-          try {
-            if (cfg.debug) window.apntag.debug = true;
+  const cfg = window.__XANDR_CONFIG || {};
+  const astDebug = true; // force debug ON
+  const disablePsa = qs("disable_psa") === "1";
+  const refreshMs = parseInt(qs("refresh") || "0", 10);
 
-            // Member context (helps when multiple members / testing setups)
-            window.apntag.setPageOpts({ member: cfg.memberId });
+  const keywords = {
+    debug: "1",
+    env: qs("env") || "local",
+    test: qs("test") || "1"
+  };
 
-            // Define the slot
-            window.apntag.defineTag({
-              tagId: cfg.placementId,
-              sizes: [cfg.size],
-              targetId: "ad-300x600"
-            });
+  // Expose globally for dongle inspection
+  window.__AST_DEBUG__ = {
+    placementId: cfg.placementId,
+    memberId: cfg.memberId,
+    size: cfg.size,
+    keywords,
+    disablePsa
+  };
 
-            // Request the ad
-            window.apntag.loadTags();
+  function log(...args) {
+    console.log("%c[AST DEBUG]", "color:#2563eb;font-weight:bold;", ...args);
+  }
 
-          } catch (e) {
-            console.error("AST error:", e);
-          }
-        });
+  function initAst() {
+
+    window.apntag = window.apntag || {};
+    window.apntag.anq = window.apntag.anq || [];
+
+    window.apntag.anq.push(function() {
+
+      window.apntag.debug = true; // built-in AST debug
+
+      log("PageOpts → member:", cfg.memberId);
+
+      window.apntag.setPageOpts({
+        member: cfg.memberId,
+        keywords: keywords
+      });
+
+      log("Defining tag with:", {
+        placementId: cfg.placementId,
+        size: cfg.size,
+        disablePsa,
+        keywords
+      });
+
+      window.apntag.defineTag({
+        tagId: cfg.placementId,
+        sizes: [cfg.size],
+        targetId: "ad-300x600",
+        disablePsa: disablePsa,
+        keywords: keywords
+      });
+
+      // Listen for render events
+      window.apntag.onEvent = window.apntag.onEvent || function(){};
+      window.apntag.onEvent("adAvailable", function(e) {
+        log("Ad Available", e);
+      });
+
+      window.apntag.onEvent("adLoaded", function(e) {
+        log("Ad Loaded", e);
+      });
+
+      window.apntag.onEvent("adNoBid", function(e) {
+        log("No Bid", e);
+      });
+
+      window.apntag.onEvent("adError", function(e) {
+        log("Ad Error", e);
+      });
+
+      log("Calling loadTags()");
+      window.apntag.loadTags();
+
+      if (refreshMs && refreshMs > 5000) {
+        setInterval(function() {
+          log("Refreshing tag...");
+          window.apntag.refresh();
+        }, refreshMs);
       }
 
-      var poll = setInterval(function() {
-        tries++;
-        if (window.apntag && window.apntag.anq) {
-          clearInterval(poll);
-          initAstTag();
-        } else if (tries >= maxTries) {
-          clearInterval(poll);
-          console.warn("AST not available. Check network / adblock / ast.js load.");
-        }
-      }, 100);
-    })();
-  </script>
+    });
+  }
+
+  // Wait for AST runtime
+  let tries = 0;
+  const poll = setInterval(function() {
+    tries++;
+    if (window.apntag && window.apntag.anq) {
+      clearInterval(poll);
+      log("AST Ready → Initializing");
+      initAst();
+    }
+    if (tries > 50) {
+      clearInterval(poll);
+      console.warn("AST failed to initialize");
+    }
+  }, 100);
+
+})();
+</script>
 </body>
 </html>
+
