@@ -1,1 +1,137 @@
-<p>Test</p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Microsoft Brand Lift Study Dashboard (Prototype)</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="kicker">Brand Lift Study · Prototype</div>
+      <h1>Microsoft 1P Brand Lift Campaign — Test vs Control</h1>
+      <p class="sub">
+        This report estimates the impact of Microsoft’s 1st-party Brand Lift messaging campaign on survey responses by comparing
+        an exposed cohort (Test) vs a non-exposed cohort (Control).
+      </p>
+
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="meta-title">Branding campaign delivery</div>
+          <div class="meta-body">
+            <div><b>Impressions:</b> 153,249</div>
+            <div><b>Users reached:</b> 51,904</div>
+            <div><b>Geo:</b> US-only</div>
+            <div><b>Audience:</b> Advertising professionals (LinkedIn segments)</div>
+          </div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-title">Study design</div>
+          <div class="meta-body">
+            <div><b>Control:</b> cid = 31150957 (non-exposed)</div>
+            <div><b>Test:</b> cid = 31150960 (exposed)</div>
+            <div><b>Sample:</b> 200 Control + 200 Test (example)</div>
+            <div><b>Questions:</b> Providers, approach, measurement goals</div>
+          </div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-title">Data source</div>
+          <div class="meta-body">
+            <div><b>Google Sheet:</b> survey responses (ts, cid, crid, q1, q2, q3)</div>
+            <div class="muted">Loaded live via CSV export (no backend required).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="refreshBtn" class="btn">Refresh data</button>
+        <div id="status" class="status">Ready.</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <h2>Executive summary</h2>
+      <div class="cards" id="summaryCards"></div>
+      <p class="note">
+        Lift is computed as <b>Test − Control</b> for each metric (percentage points).
+        Confidence intervals are 95% and p-values are from a two-proportion z-test (approximation).
+      </p>
+    </section>
+
+    <section class="section grid-2">
+      <div class="panel">
+        <h3>Q2 · Preferred measurement approach (distribution)</h3>
+        <canvas id="q2DistChart" height="220"></canvas>
+        <div class="foot" id="q2Foot"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Q2 · Lift by answer (Test − Control)</h3>
+        <canvas id="q2LiftChart" height="220"></canvas>
+        <div class="foot" id="q2LiftFoot"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="panel">
+        <h3>Q1 · Provider preference lift (multi-select)</h3>
+        <canvas id="q1LiftChart" height="260"></canvas>
+        <div class="foot" id="q1Foot"></div>
+      </div>
+    </section>
+
+    <section class="section grid-2">
+      <div class="panel">
+        <h3>Q3 · What users want to measure (top themes)</h3>
+        <canvas id="q3ThemesChart" height="220"></canvas>
+        <div class="foot">Themes are extracted with simple keyword matching (prototype-grade).</div>
+      </div>
+
+      <div class="panel">
+        <h3>Recommendations</h3>
+        <div id="reco" class="reco"></div>
+        <div class="foot">
+          These recommendations are based on statistically significant lifts (p&lt;0.05) and effect size.
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="panel">
+        <h3>Appendix · Metric table</h3>
+        <div class="table-wrap">
+          <table id="metricsTable">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Control</th>
+                <th>Test</th>
+                <th>Lift (pp)</th>
+                <th>95% CI</th>
+                <th>p-value</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="foot">
+          Notes: Multi-select Q1 is treated as a binary indicator per provider (selected vs not selected).
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>© 2026 Microsoft — Brand Lift Study (Prototype)</div>
+      <div class="muted">Client-side only · GitHub Pages compatible</div>
+    </footer>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
