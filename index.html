@@ -278,115 +278,72 @@
   </footer>
 
 <script>
-(function() {
-
-  function qs(name) {
-    return new URLSearchParams(window.location.search).get(name);
-  }
-
+(function () {
   const cfg = window.__XANDR_CONFIG || {};
-  const astDebug = true; // force debug ON
-  const disablePsa = qs("disable_psa") === "1";
-  const refreshMs = parseInt(qs("refresh") || "0", 10);
+  const TARGET = "ad-300x600";
 
-  const keywords = {
-    debug: "1",
-    env: qs("env") || "local",
-    test: qs("test") || "1"
-  };
+  function log(...a){ console.log("%c[AST]", "color:#2563eb;font-weight:700", ...a); }
+  function warn(...a){ console.warn("[AST]", ...a); }
 
-  // Expose globally for dongle inspection
-  window.__AST_DEBUG__ = {
-    placementId: cfg.placementId,
-    memberId: cfg.memberId,
-    size: cfg.size,
-    keywords,
-    disablePsa
-  };
-
-  function log(...args) {
-    console.log("%c[AST DEBUG]", "color:#2563eb;font-weight:bold;", ...args);
-  }
-
-  function initAst() {
+  function init() {
+    const el = document.getElementById(TARGET);
+    if (!el) {
+      warn("Target element not found:", TARGET);
+      return;
+    }
 
     window.apntag = window.apntag || {};
     window.apntag.anq = window.apntag.anq || [];
 
-    window.apntag.anq.push(function() {
+    window.apntag.anq.push(function () {
+      try {
+        window.apntag.debug = true;
 
-      window.apntag.debug = true; // built-in AST debug
+        log("setPageOpts", { member: cfg.memberId });
+        window.apntag.setPageOpts({ member: cfg.memberId });
 
-      log("PageOpts → member:", cfg.memberId);
+        // Event hooks (super utile)
+        if (window.apntag.onEvent) {
+          ["adRequested","adAvailable","adLoaded","adNoBid","adError"].forEach(evt => {
+            window.apntag.onEvent(evt, (e) => log("EVENT:", evt, e));
+          });
+        } else {
+          warn("apntag.onEvent not available in this AST build");
+        }
 
-      window.apntag.setPageOpts({
-        member: cfg.memberId,
-        keywords: keywords
-      });
+        log("defineTag", { tagId: cfg.placementId, size: cfg.size, targetId: TARGET });
+        window.apntag.defineTag({
+          tagId: cfg.placementId,
+          sizes: [cfg.size],
+          targetId: TARGET,
+          disablePsa: true
+        });
 
-      log("Defining tag with:", {
-        placementId: cfg.placementId,
-        size: cfg.size,
-        disablePsa,
-        keywords
-      });
+        log("loadTags()");
+        window.apntag.loadTags();
 
-      window.apntag.defineTag({
-        tagId: cfg.placementId,
-        sizes: [cfg.size],
-        targetId: "ad-300x600",
-        disablePsa: disablePsa,
-        keywords: keywords
-      });
+        // Post-check: did we get an iframe?
+        setTimeout(() => {
+          const ifr = el.querySelector("iframe");
+          log("DOM after loadTags → iframe?", !!ifr, ifr || "");
+        }, 800);
 
-      // Listen for render events
-      window.apntag.onEvent = window.apntag.onEvent || function(){};
-      window.apntag.onEvent("adAvailable", function(e) {
-        log("Ad Available", e);
-      });
-
-      window.apntag.onEvent("adLoaded", function(e) {
-        log("Ad Loaded", e);
-      });
-
-      window.apntag.onEvent("adNoBid", function(e) {
-        log("No Bid", e);
-      });
-
-      window.apntag.onEvent("adError", function(e) {
-        log("Ad Error", e);
-      });
-
-      log("Calling loadTags()");
-      window.apntag.loadTags();
-
-      if (refreshMs && refreshMs > 5000) {
-        setInterval(function() {
-          log("Refreshing tag...");
-          window.apntag.refresh();
-        }, refreshMs);
+      } catch (err) {
+        console.error("[AST] init error", err);
       }
-
     });
   }
 
-  // Wait for AST runtime
-  let tries = 0;
-  const poll = setInterval(function() {
-    tries++;
-    if (window.apntag && window.apntag.anq) {
-      clearInterval(poll);
-      log("AST Ready → Initializing");
-      initAst();
-    }
-    if (tries > 50) {
-      clearInterval(poll);
-      console.warn("AST failed to initialize");
-    }
-  }, 100);
-
+  // Important: run after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
 </script>
+
 </body>
 </html>
+
 
