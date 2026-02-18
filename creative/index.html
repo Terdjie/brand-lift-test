@@ -1,1 +1,60 @@
-Test
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Survey Ad</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="ad" role="application" aria-label="Mini questionnaire">
+      <header class="header">
+        <div class="brand">Survey</div>
+        <button class="cta-link" type="button" id="ctaClick">En savoir plus</button>
+      </header>
+
+      <main class="content">
+        <h1 class="title">3 questions rapides</h1>
+        <p class="subtitle">Réponds en quelques secondes.</p>
+
+        <form id="surveyForm" class="form" autocomplete="off">
+          <div class="field">
+            <label for="q1" class="label">1) Quelle est ta priorité du moment ?</label>
+            <input id="q1" name="q1" type="text" class="input" maxlength="120" placeholder="Ta réponse…" />
+          </div>
+
+          <div class="field">
+            <label for="q2" class="label">2) Quel produit/services utilises-tu le plus ?</label>
+            <input id="q2" name="q2" type="text" class="input" maxlength="120" placeholder="Ta réponse…" />
+          </div>
+
+          <div class="field">
+            <label for="q3" class="label">3) Qu’est-ce qui te ferait gagner du temps ?</label>
+            <input id="q3" name="q3" type="text" class="input" maxlength="120" placeholder="Ta réponse…" />
+          </div>
+
+          <div class="actions">
+            <button id="sendBtn" class="btn" type="submit">Send</button>
+            <div id="status" class="status" aria-live="polite"></div>
+          </div>
+
+          <p class="fineprint">En envoyant, tes réponses sont enregistrées de manière anonyme.</p>
+        </form>
+
+        <div id="thankYou" class="thankyou" hidden>
+          <div class="check">✓</div>
+          <div class="thanks-title">Merci !</div>
+          <div class="thanks-subtitle">Tes réponses ont bien été envoyées.</div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <span class="hint">Astuce : appuie sur Entrée pour envoyer.</span>
+      </footer>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
+
