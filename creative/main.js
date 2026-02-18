@@ -36,7 +36,7 @@ function sendBeaconGet(paramsObj) {
   const ctaClick = document.getElementById("ctaClick");
 
   ctaClick.addEventListener("click", () => {
-    window.open(getClickUrl(), "_blank");
+    window.open(getClickUrl(), "_blank", "noopener,noreferrer");
   });
 
   form.addEventListener("submit", (e) => {
@@ -77,3 +77,4 @@ function sendBeaconGet(paramsObj) {
     }
   });
 })();
+
