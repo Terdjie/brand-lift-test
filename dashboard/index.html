@@ -55,14 +55,62 @@
   </header>
 
   <main class="container">
-    <section class="section">
-      <h2>Executive summary</h2>
-      <div class="cards" id="summaryCards"></div>
-      <p class="note">
-        Lift is computed as <b>Test − Control</b> for each metric (percentage points).
-        Confidence intervals are 95% and p-values are from a two-proportion z-test (approximation).
-      </p>
-    </section>
+<section class="section">
+  <h2>Overview</h2>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="kpi-title">Search lift</div>
+      <div class="kpi-value" id="kpiSearch">--</div>
+      <div class="kpi-row">
+        <span>Control</span>
+        <span id="searchControl"></span>
+      </div>
+      <div class="kpi-row">
+        <span>Treatment</span>
+        <span id="searchTreatment"></span>
+      </div>
+      <div class="kpi-row">
+        <span>Confidence level</span>
+        <span class="badge high">High</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kpi-title">Visit lift</div>
+      <div class="kpi-value" id="kpiVisit">--</div>
+      <div class="kpi-row">
+        <span>Control</span>
+        <span id="visitControl"></span>
+      </div>
+      <div class="kpi-row">
+        <span>Treatment</span>
+        <span id="visitTreatment"></span>
+      </div>
+      <div class="kpi-row">
+        <span>Confidence level</span>
+        <span class="badge high">High</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kpi-title">Conversion lift</div>
+      <div class="kpi-value" id="kpiConversion">--</div>
+      <div class="kpi-row">
+        <span>Control</span>
+        <span id="convControl"></span>
+      </div>
+      <div class="kpi-row">
+        <span>Treatment</span>
+        <span id="convTreatment"></span>
+      </div>
+      <div class="kpi-row">
+        <span>Confidence level</span>
+        <span class="badge high">High</span>
+      </div>
+    </div>
+  </div>
+</section>
 
     <section class="section grid-2">
       <div class="panel">
