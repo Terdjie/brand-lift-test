@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -212,12 +212,12 @@
     <div class="topbar-inner">
       <div class="logo">Daily <span>Ledger</span></div>
       <nav class="nav">
-        <a href="#">À la une</a>
+        <a href="#">Top Stories</a>
         <a href="#">Tech</a>
-        <a href="#">Économie</a>
-        <a href="#">Monde</a>
+        <a href="#">Business</a>
+        <a href="#">World</a>
         <a href="#">Culture</a>
-        <a href="#">Sport</a>
+        <a href="#">Sports</a>
       </nav>
     </div>
   </div>
@@ -228,58 +228,60 @@
         <div class="hero-img"></div>
         <div class="hero-body">
           <div class="kicker">Breaking</div>
-          <h1>Démo éditeur : rendu d’une créa HTML5 interactive en Direct (Xandr Monetize)</h1>
+          <h1>Publisher demo: rendering an interactive HTML5 creative in Direct (Xandr Monetize)</h1>
           <p class="sub">
-            Cette page simule un site de news avec un encart pub <b>300×600</b> à droite, servi via le runtime officiel AST.
+            This page simulates a news website with a <b>300×600</b> ad slot on the right, served via the official AST runtime.
           </p>
         </div>
       </section>
 
       <section class="grid" aria-label="Articles">
         <article class="card">
-          <div class="meta"><span>Tech</span><span>•</span><span>Il y a 2h</span></div>
-          <h3 class="title">Publicité interactive : les patterns qui marchent</h3>
-          <p class="excerpt">Questionnaire court, UI claire, soumission “best-effort” et tracking minimal pour prototyper vite.</p>
+          <div class="meta"><span>Tech</span><span>•</span><span>2h ago</span></div>
+          <h3 class="title">Interactive advertising: patterns that perform</h3>
+          <p class="excerpt">Short survey, clean UI, best-effort submission and lightweight tracking to prototype quickly.</p>
         </article>
 
         <article class="card">
-          <div class="meta"><span>Économie</span><span>•</span><span>Il y a 4h</span></div>
-          <h3 class="title">Pourquoi le 300×600 est idéal pour un survey</h3>
-          <p class="excerpt">Haute visibilité et assez de place pour 3 questions sans dégrader l’expérience utilisateur.</p>
+         <div class="meta"><span>Business</span><span>•</span><span>4h ago</span></div>
+         <h3 class="title">Why 300×600 is ideal for a survey</h3>
+         <p class="excerpt">High visibility and enough space for 3 questions without harming user experience.</p>
         </article>
 
         <article class="card">
-          <div class="meta"><span>Monde</span><span>•</span><span>Hier</span></div>
-          <h3 class="title">Privacy : prototyper sans données sensibles</h3>
-          <p class="excerpt">Réponses anonymes + timestamp + ids de campagne suffisent pour un POC robuste.</p>
+          <div class="meta"><span>World</span><span>•</span><span>Yesterday</span></div>
+          <h3 class="title">Privacy: prototyping without sensitive data</h3>
+          <p class="excerpt">Anonymous answers + timestamp + campaign IDs are enough for a robust POC.</p>
         </article>
 
         <article class="card">
-          <div class="meta"><span>Culture</span><span>•</span><span>Hier</span></div>
-          <h3 class="title">Design : la lisibilité avant tout</h3>
-          <p class="excerpt">Contraste, hiérarchie typographique et CTA clair sont les clés d’un bon taux de complétion.</p>
+          <div class="meta"><span>Culture</span><span>•</span><span>Yesterday</span></div>
+          <h3 class="title">Design: readability first</h3>
+          <p class="excerpt">Contrast, typographic hierarchy and a clear CTA drive higher completion rates.</p>
         </article>
       </section>
     </main>
 
     <aside class="sidebar">
       <div class="sidecard ad-wrap">
-        <div class="ad-label">Publicité</div>
+        <div class="ad-label">Advertisement</div>
+
 
         <!-- AST will render the creative inside this container -->
         <div class="ad-slot" id="ad-300x600">
           <div id="ad-fallback" class="ad-fallback">
-            Chargement de la publicité…
-            <br><br>
-            Si rien ne s'affiche : vérifie que la campagne/line item est live,
-            que le placement accepte ce domaine, et que la taille est bien 300×600.
+              Loading advertisement…
+              <br><br>
+              If nothing appears: check that the campaign/line item is live,
+              that the placement accepts this domain,
+              and that the size is correctly set to 300×600.
           </div>
         </div>
 
 
         <div style="font-size:12px;color:var(--muted);line-height:1.4">
-          Config : placement <code>37217254</code>, member <code>958</code>.
-          (Tu peux activer <code>debug</code> dans <code>__XANDR_CONFIG</code> si besoin.)
+          Config: placement <code>37217254</code>, member <code>958</code>.
+          (You can enable <code>debug</code> in <code>__XANDR_CONFIG</code> if needed.)
         </div>
       </div>
 
@@ -293,8 +295,7 @@
 
       <div class="sidecard">
         <h2>Newsletter</h2>
-        <p class="excerpt">Reçois le brief des meilleures campagnes testées cette semaine.</p>
-        <div style="display:flex; gap:8px; margin-top:10px;">
+          <p class="excerpt">Get the brief of the best campaigns tested this week.</p>        <div style="display:flex; gap:8px; margin-top:10px;">
           <input type="email" placeholder="email@domain.com"
                  style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--border);" />
           <button style="padding:10px 12px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:700; cursor:pointer;">
@@ -307,8 +308,8 @@
 
   <footer>
     <div class="footer-inner">
-      <div>© 2026 Daily Ledger — Page de démo.</div>
-      <div>Slot pub: <code>300×600</code> • AST: <code>acdn.adnxs.com/ast/ast.js</code></div>
+      <div>© 2026 Daily Ledger — Demo page.</div>
+      <div>Ad slot: <code>300×600</code> • AST: <code>acdn.adnxs.com/ast/ast.js</code></div>
     </div>
   </footer>
 
