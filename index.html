@@ -363,8 +363,8 @@
   }
 
   function init() {
-//    ensureBadge();
-//    setBadge("INIT", "Waiting for AST…");
+    ensureBadge();
+    setBadge("INIT", "Waiting for AST…");
 
     const el = document.getElementById(TARGET);
     if (!el) { setBadge("ERROR", "Target element not found: " + TARGET); return; }
