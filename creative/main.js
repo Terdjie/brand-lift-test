@@ -35,12 +35,20 @@ function sendBeaconGet(paramsObj) {
   const thankYou = document.getElementById("thankYou");
   const ctaClick = document.getElementById("ctaClick");
 
+  // ✅ Force l'état initial
+  form.hidden = false;
+  thankYou.hidden = true;
+  sendBtn.disabled = false;
+
   ctaClick.addEventListener("click", () => {
     window.open(getClickUrl(), "_blank", "noopener,noreferrer");
   });
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    
+    // ✅ empêche double submit
+    if (sendBtn.disabled) return;
 
     const q1 = sanitize(document.getElementById("q1").value);
     const q2 = sanitize(document.getElementById("q2").value);
@@ -51,8 +59,11 @@ function sendBeaconGet(paramsObj) {
       return;
     }
 
+    // ✅ Désactive + grise le bouton (et optionnel: change le label)
     sendBtn.disabled = true;
+    sendBtn.textContent = "Envoyé";
     setStatus(status, "Envoi en cours…");
+
 
     const payload = {
       ts: new Date().toISOString(),
@@ -67,9 +78,14 @@ function sendBeaconGet(paramsObj) {
 
     try {
       sendBeaconGet(payload);
+
+      // ✅ Affiche Merci uniquement après envoi
       setStatus(status, "");
-      form.hidden = true;
       thankYou.hidden = false;
+
+      //setStatus(status, "");
+      form.hidden = true;
+      //thankYou.hidden = false;
     } catch (err) {
       console.error(err);
       setStatus(status, "Échec de l’envoi. Réessaie.", true);
