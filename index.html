@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daily Ledger — Démo News + Ad Slot 300x600</title>
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#101828;
+      --muted:#667085;
+      --border:rgba(16,24,40,.12);
+      --shadow:0 8px 24px rgba(16,24,40,.08);
+      --accent:#2563eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:var(--card);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .logo{
+      display:flex; align-items:baseline; gap:10px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+    .logo span{color:var(--accent)}
+    .nav{
+      display:flex; gap:14px; flex-wrap:wrap;
+      font-size:14px; color:var(--muted);
+    }
+    .nav a{ text-decoration:none; padding:6px 8px; border-radius:10px;}
+    .nav a:hover{ background:rgba(37,99,235,.08); color:var(--text);}
+
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 16px 60px;
+      display:grid;
+      grid-template-columns: 1fr 340px; /* contenu + sidebar */
+      gap:18px;
+    }
+    @media (max-width: 980px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+
+    .hero{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .hero-img{
+      height:210px;
+      background:linear-gradient(120deg, rgba(37,99,235,.35), rgba(16,24,40,.05));
+    }
+    .hero-body{ padding:16px; }
+    .kicker{ color:var(--accent); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+    h1{ margin:8px 0 8px; font-size:26px; line-height:1.15;}
+    .sub{ margin:0; color:var(--muted); font-size:14px; line-height:1.45;}
+
+    .grid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+    @media (max-width: 760px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:14px;
+      display:grid;
+      gap:8px;
+    }
+    .meta{ font-size:12px; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap;}
+    .title{ font-size:16px; font-weight:750; margin:0; }
+    .excerpt{ margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
+
+    .sidebar{
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+    .sidecard{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .sidecard h2{ margin:0 0 10px; font-size:14px; }
+    .tag{
+      display:inline-block;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(37,99,235,.08);
+      color:var(--accent);
+      font-weight:650;
+      margin:0 6px 8px 0;
+    }
+
+    /* ===== Ad slot 300x600 ===== */
+    .ad-wrap{
+      display:grid;
+      gap:8px;
+    }
+    .ad-label{
+      font-size:11px;
+      color:var(--muted);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .ad-slot{
+      width:300px;
+      height:600px;
+      border:1px dashed rgba(16,24,40,.25);
+      border-radius:12px;
+      background:linear-gradient(180deg, rgba(16,24,40,.02), rgba(16,24,40,.00));
+      overflow:hidden;
+      display:block;
+    }
+    .ad-slot iframe{
+      width:300px; height:600px;
+      border:0;
+      display:block;
+    }
+    .ad-note{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--card);
+      padding:18px 16px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .footer-inner{ max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+    code{ background:rgba(16,24,40,.06); padding:2px 6px; border-radius:8px;}
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">Daily <span>Ledger</span></div>
+      <nav class="nav">
+        <a href="#">À la une</a>
+        <a href="#">Tech</a>
+        <a href="#">Économie</a>
+        <a href="#">Monde</a>
+        <a href="#">Culture</a>
+        <a href="#">Sport</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <main>
+      <section class="hero">
+        <div class="hero-img"></div>
+        <div class="hero-body">
+          <div class="kicker">Breaking</div>
+          <h1>Nouveau format publicitaire interactif : test en conditions réelles</h1>
+          <p class="sub">
+            Page démo type “site de news” avec un encart 300×600. Remplace les IDs Xandr dans le tag pour servir ta créa HTML5.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="Articles">
+        <article class="card">
+          <div class="meta"><span>Tech</span><span>•</span><span>Il y a 2h</span></div>
+          <h3 class="title">IA : les tendances à suivre en 2026</h3>
+          <p class="excerpt">Un tour d’horizon des usages qui se banalisent : recherche, productivité, agents, et expériences interactives dans la pub.</p>
+        </article>
+
+        <article class="card">
+          <div class="meta"><span>Économie</span><span>•</span><span>Il y a 4h</span></div>
+          <h3 class="title">Retail media : pourquoi l’interactif devient clé</h3>
+          <p class="excerpt">Les annonceurs cherchent des formats plus engageants. Les mini-surveys sont un bon compromis entre UX et mesure.</p>
+        </article>
+
+        <article class="card">
+          <div class="meta"><span>Monde</span><span>•</span><span>Hier</span></div>
+          <h3 class="title">Privacy : comment prototyper sans données perso</h3>
+          <p class="excerpt">Bonnes pratiques : réponses anonymes, pas d’identifiants publicitaires, endpoint simple, et stockage minimal.</p>
+        </article>
+
+        <article class="card">
+          <div class="meta"><span>Culture</span><span>•</span><span>Hier</span></div>
+          <h3 class="title">Design : l’UI minimaliste marche mieux en pub</h3>
+          <p class="excerpt">Lisibilité, contraste, et friction minimale : trois règles d’or pour garder de bonnes completion rates.</p>
+        </article>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidecard ad-wrap">
+        <div class="ad-label">Publicité</div>
+
+        <!-- =========================
+             OPTION 1: IFRAME TAG (simple)
+             Remplace PLACEMENT_ID, MEMBER_ID etc.
+             ========================= -->
+        <div class="ad-slot">
+          <iframe
+            title="Xandr 300x600"
+            src="https://ib.adnxs.com/tt?id=PLACEMENT_ID&size=300x600&referrer=__REFERRER__&cb=__CACHEBUSTER__"
+            scrolling="no"
+            allow="clipboard-write; autoplay"
+            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+          ></iframe>
+        </div>
+
+        <!-- =========================
+             OPTION 2: JS TAG (souvent utilisé)
+             Décommente ce bloc et commente l'iframe ci-dessus si tu préfères.
+             =========================
+        <div class="ad-slot" id="ad-300x600"></div>
+        <script type="text/javascript">
+          (function() {
+            var container = document.getElementById("ad-300x600");
+            if (!container) return;
+
+            var s = document.createElement("script");
+            s.type = "text/javascript";
+            s.async = true;
+
+            // Exemple JS tag (à adapter selon ton setup Monetize / tag généré)
+            // Remplace PLACEMENT_ID + paramètres nécessaires
+            s.src = "https://ib.adnxs.com/ttj?id=PLACEMENT_ID&size=300x600&referrer=" + encodeURIComponent(document.referrer || "") + "&cb=" + String(Date.now());
+
+            container.appendChild(s);
+          })();
+        </script>
+        -->
+
+        <div class="ad-note">
+          À remplacer : <code>PLACEMENT_ID</code> (et éventuellement member / paramètres selon le tag Monetize que tu génères).
+          <br/>Astuce : garde un <code>cb</code> (cachebuster) pour éviter le caching pendant les tests.
+        </div>
+      </div>
+
+      <div class="sidecard">
+        <h2>Trending</h2>
+        <span class="tag">Interactive Ads</span>
+        <span class="tag">HTML5</span>
+        <span class="tag">Survey</span>
+        <span class="tag">Brand Lift</span>
+      </div>
+
+      <div class="sidecard">
+        <h2>Newsletter</h2>
+        <p class="excerpt">Reçois le brief des meilleures campagnes testées cette semaine.</p>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="email" placeholder="email@domain.com" style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--border);" />
+          <button style="padding:10px 12px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:700; cursor:pointer;">
+            OK
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© 2026 Daily Ledger — Page de démo.</div>
+      <div>Slot pub: <code>300×600</code> • Tag Xandr: <code>ib.adnxs.com</code></div>
+    </div>
+  </footer>
+
+  <script>
+    // Remplace __CACHEBUSTER__ et __REFERRER__ dans l'iframe si tu gardes l'Option 1
+    (function () {
+      const iframe = document.querySelector('.ad-slot iframe');
+      if (!iframe) return;
+
+      const url = new URL(iframe.src);
+      // Remplacements safe
+      if (url.searchParams.get('cb') === '__CACHEBUSTER__') url.searchParams.set('cb', String(Date.now()));
+      if (url.searchParams.get('referrer') === '__REFERRER__') url.searchParams.set('referrer', document.referrer || '');
+      iframe.src = url.toString();
+    })();
+  </script>
+</body>
+</html>
