@@ -1,57 +1,74 @@
-// ====== CONFIG ======
-//const SHEET_ID = "14B-lJ09Seqd2ypmDbCPUm0OgVMVnofOPV3lFCoK3OqQ";
-
-// Put your tab name here (e.g., "Sheet1"). If unsure, open the Sheet and read the bottom tab label.
-//const SHEET_TAB = "responses";
-
 // Google Sheets CSV export URL (no auth required if the sheet is shared / published)
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh01ccfdoMhKLf04m30buSVkBUtNzX7Zk3UXb9Ft7or2HteK_VKDei4VHsisT8nXSr8W7AjBIN4D0j/pub?output=csv";
 
 // Cohorts
 const CID_CONTROL = "31150957";
-const CID_TEST = "31150960";
+const CID_TREATMENT = "31150960"; // "Test" / exposed cohort
 
-// Q1 providers we want to track (multi-select stored as comma-separated values)
+// Q1 providers tracked (multi-select stored as "Kantar, First-party, ...")
 const Q1_PROVIDERS = ["Kantar", "Nielsen", "Ipsos", "Dynata", "First-party", "Other"];
 
-// Q2 options
+// Q2 options (single-select)
 const Q2_OPTIONS = ["First-party", "Third-party", "Hybrid", "No preference"];
 
-// Q3 theme extraction (prototype keyword mapping)
-const Q3_THEMES = [
-  { name: "Awareness", keywords: ["awareness", "brand awareness"] },
-  { name: "Ad Recall", keywords: ["recall", "ad recall", "message association"] },
-  { name: "Consideration", keywords: ["consideration"] },
-  { name: "Purchase Intent", keywords: ["purchase", "intent"] },
-  { name: "Incremental Reach", keywords: ["incremental", "reach"] },
-  { name: "Cross-channel Impact", keywords: ["cross-channel", "cross channel", "omnichannel"] }
+// KPI mapping (Microsoft-like tiles)
+const KPI_DEFS = [
+  {
+    key: "Search lift",
+    metricName: "Q2 · First-party preference",
+    computeBinary: (row) => (row.q2 || "").trim() === "First-party",
+    ui: { kpi: "kpiSearch", control: "searchControl", treatment: "searchTreatment" }
+  },
+  {
+    key: "Visit lift",
+    metricName: "Q1 · Selected Kantar",
+    computeBinary: (row) => normalizeQ1(row.q1).includes("Kantar"),
+    ui: { kpi: "kpiVisit", control: "visitControl", treatment: "visitTreatment" }
+  },
+  {
+    key: "Conversion lift",
+    metricName: "Q2 · Hybrid preference",
+    computeBinary: (row) => (row.q2 || "").trim() === "Hybrid",
+    ui: { kpi: "kpiConversion", control: "convControl", treatment: "convTreatment" }
+  }
 ];
 
-// ====== CHART HANDLES ======
-let q2DistChart, q2LiftChart, q1LiftChart, q3ThemesChart;
-
-// ====== UTIL ======
+// ====== DOM helpers ======
 const $ = (id) => document.getElementById(id);
-
+function setText(id, value) {
+  const el = $(id);
+  if (el) el.textContent = value;
+}
 function setStatus(msg) {
-  $("status").textContent = msg;
+  const el = $("status");
+  if (el) el.textContent = msg;
 }
 
-function formatPct(x) {
-  return (x * 100).toFixed(1) + "%";
+// ====== formatting ======
+function pct(x) { return (x * 100).toFixed(2) + "%"; }
+function pct0(x) { return (x * 100).toFixed(0) + "%"; }
+function liftRel(pT, pC) {
+  if (pC <= 0) return 0;
+  return (pT - pC) / pC;
 }
-function formatPP(x) {
-  const pp = x * 100;
-  const sign = pp > 0 ? "+" : "";
-  return sign + pp.toFixed(1) + " pp";
+function formatLiftRel(l) {
+  const s = l >= 0 ? "+" : "";
+  return s + (l * 100).toFixed(0) + "%";
 }
 function formatPValue(p) {
   if (p < 0.0001) return "<0.0001";
   return p.toFixed(4);
 }
+function confidenceFromP(p) {
+  // mimic “confidence level” feel (you can tune thresholds)
+  if (p < 0.05) return "High";
+  if (p < 0.10) return "Medium";
+  return "Low";
+}
 
+// ====== stats ======
 function normalCdf(x) {
-  // Abramowitz and Stegun approximation (good enough for prototype)
+  // A&S approximation
   const t = 1 / (1 + 0.2316419 * Math.abs(x));
   const d = 0.3989423 * Math.exp(-x * x / 2);
   let prob = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
@@ -59,26 +76,41 @@ function normalCdf(x) {
   return x >= 0 ? prob : 1 - prob;
 }
 
-function twoPropDiffCI(p1, n1, p0, n0, z = 1.96) {
-  const se = Math.sqrt((p1 * (1 - p1)) / n1 + (p0 * (1 - p0)) / n0);
-  const diff = p1 - p0;
-  return { diff, lo: diff - z * se, hi: diff + z * se, se };
-}
-
-function twoPropZTest(p1, n1, p0, n0) {
-  // pooled proportion under H0
-  const x1 = p1 * n1;
-  const x0 = p0 * n0;
-  const p = (x1 + x0) / (n1 + n0);
-  const se = Math.sqrt(p * (1 - p) * (1 / n1 + 1 / n0));
-  if (se === 0) return { z: 0, p: 1 };
-  const z = (p1 - p0) / se;
+function twoPropZTest(pT, nT, pC, nC) {
+  // pooled under H0
+  const xT = pT * nT;
+  const xC = pC * nC;
+  const p = (xT + xC) / (nT + nC);
+  const se = Math.sqrt(p * (1 - p) * (1 / nT + 1 / nC));
+  if (!isFinite(se) || se === 0) return { z: 0, p: 1 };
+  const z = (pT - pC) / se;
   const pval = 2 * (1 - normalCdf(Math.abs(z)));
   return { z, p: pval };
 }
 
+function diffCI95(pT, nT, pC, nC) {
+  // Wald CI on difference (good enough for prototype)
+  const z = 1.96;
+  const se = Math.sqrt((pT * (1 - pT)) / nT + (pC * (1 - pC)) / nC);
+  const d = pT - pC;
+  return { diff: d, lo: d - z * se, hi: d + z * se, se };
+}
+
+function relLiftCI95(pT, nT, pC, nC) {
+  // Convert diff CI to relative lift CI: (pT - pC)/pC
+  // This is an approximation but matches typical “lift %” reporting.
+  const ci = diffCI95(pT, nT, pC, nC);
+  if (pC <= 0) return { lift: 0, lo: 0, hi: 0 };
+  return {
+    lift: (pT - pC) / pC,
+    lo: ci.lo / pC,
+    hi: ci.hi / pC
+  };
+}
+
+// ====== CSV parsing ======
 function parseCsv(csvText) {
-  // Robust CSV parser (handles quoted commas)
+  // Robust CSV parser handling quoted commas
   const rows = [];
   let row = [];
   let cur = "";
@@ -99,7 +131,7 @@ function parseCsv(csvText) {
     } else if ((c === "\n" || c === "\r") && !inQuotes) {
       if (c === "\r" && next === "\n") i++;
       row.push(cur);
-      if (row.length > 1 || row[0] !== "") rows.push(row);
+      if (row.length > 1 || (row[0] || "").trim() !== "") rows.push(row);
       row = [];
       cur = "";
     } else {
@@ -111,9 +143,9 @@ function parseCsv(csvText) {
     rows.push(row);
   }
 
-  const header = rows.shift().map(h => h.trim());
+  const header = (rows.shift() || []).map(h => (h || "").trim());
   return rows
-    .filter(r => r.length && r.some(x => (x || "").trim().length))
+    .filter(r => r.some(x => (x || "").trim().length))
     .map(r => {
       const obj = {};
       header.forEach((h, idx) => obj[h] = (r[idx] ?? "").trim());
@@ -122,345 +154,189 @@ function parseCsv(csvText) {
 }
 
 function normalizeQ1(q1) {
-  // Stored as "Kantar, First-party" etc
   return (q1 || "")
     .split(",")
     .map(s => s.trim())
     .filter(Boolean);
 }
 
-function extractThemes(q3) {
-  const t = (q3 || "").toLowerCase();
-  const hits = new Set();
-  for (const theme of Q3_THEMES) {
-    for (const kw of theme.keywords) {
-      if (t.includes(kw.toLowerCase())) {
-        hits.add(theme.name);
-        break;
-      }
-    }
+// ====== metrics computation ======
+function rateBinary(rows, predicate) {
+  const n = rows.length;
+  let x = 0;
+  for (const r of rows) if (predicate(r)) x++;
+  return { n, x, p: n ? (x / n) : 0 };
+}
+
+function buildMetricRows(controlRows, treatmentRows) {
+  const metrics = [];
+
+  // Q2: each option is a binary metric
+  for (const opt of Q2_OPTIONS) {
+    const pred = (r) => (r.q2 || "").trim() === opt;
+    metrics.push(makeMetric(`Q2 · ${opt}`, controlRows, treatmentRows, pred));
   }
-  return hits.size ? Array.from(hits) : ["Other / Unclassified"];
+
+  // Q1: each provider is a binary metric (selected vs not)
+  for (const prov of Q1_PROVIDERS) {
+    const pred = (r) => normalizeQ1(r.q1).includes(prov);
+    metrics.push(makeMetric(`Q1 · Selected ${prov}`, controlRows, treatmentRows, pred));
+  }
+
+  return metrics;
 }
 
-function destroyChart(ch) {
-  if (ch) ch.destroy();
-}
+function makeMetric(name, controlRows, treatmentRows, predicate) {
+  const c = rateBinary(controlRows, predicate);
+  const t = rateBinary(treatmentRows, predicate);
 
-// ====== METRICS ======
-function computeDistributions(rowsControl, rowsTest) {
-  const n0 = rowsControl.length;
-  const n1 = rowsTest.length;
+  const rel = liftRel(t.p, c.p);
+  const ci = relLiftCI95(t.p, t.n, c.p, c.n);
+  const zt = twoPropZTest(t.p, t.n, c.p, c.n);
+  const conf = confidenceFromP(zt.p);
 
-  // Q2 distribution
-  const q2Count = (rows) => {
-    const m = Object.fromEntries(Q2_OPTIONS.map(x => [x, 0]));
-    for (const r of rows) {
-      const v = (r.q2 || "").trim();
-      if (m[v] != null) m[v] += 1;
-    }
-    return m;
-  };
-
-  // Q1 provider selection (binary per provider)
-  const q1Rate = (rows) => {
-    const counts = Object.fromEntries(Q1_PROVIDERS.map(p => [p, 0]));
-    for (const r of rows) {
-      const selected = new Set(normalizeQ1(r.q1));
-      for (const p of Q1_PROVIDERS) {
-        if (selected.has(p)) counts[p] += 1;
-      }
-    }
-    return counts;
-  };
-
-  // Q3 themes
-  const themeCounts = (rows) => {
-    const m = {};
-    for (const r of rows) {
-      for (const th of extractThemes(r.q3)) {
-        m[th] = (m[th] || 0) + 1;
-      }
-    }
-    return m;
-  };
-
-  return {
-    n0, n1,
-    q2Control: q2Count(rowsControl),
-    q2Test: q2Count(rowsTest),
-    q1Control: q1Rate(rowsControl),
-    q1Test: q1Rate(rowsTest),
-    q3Control: themeCounts(rowsControl),
-    q3Test: themeCounts(rowsTest),
-  };
-}
-
-function metricRow(name, p0, n0, p1, n1) {
-  const ci = twoPropDiffCI(p1, n1, p0, n0);
-  const zt = twoPropZTest(p1, n1, p0, n0);
   return {
     name,
-    control: p0,
-    test: p1,
-    lift: ci.diff,
-    ciLo: ci.lo,
-    ciHi: ci.hi,
-    p: zt.p
+    controlP: c.p,
+    treatmentP: t.p,
+    relLift: rel,
+    relLo: ci.lo,
+    relHi: ci.hi,
+    pValue: zt.p,
+    confidence: conf
   };
 }
 
-// ====== RENDER ======
-function renderSummary(dist) {
-  const { n0, n1 } = dist;
-  const cards = [];
+// ====== rendering ======
+function renderKPIs(controlRows, treatmentRows) {
+  for (const kpi of KPI_DEFS) {
+    const c = rateBinary(controlRows, kpi.computeBinary);
+    const t = rateBinary(treatmentRows, kpi.computeBinary);
 
-  // Key KPIs: "First-party" in Q2, "Hybrid" in Q2, "Kantar" in Q1, "First-party" in Q1
-  const p = (x, n) => n ? x / n : 0;
-
-  const q2fp0 = p(dist.q2Control["First-party"], n0);
-  const q2fp1 = p(dist.q2Test["First-party"], n1);
-  const q2hy0 = p(dist.q2Control["Hybrid"], n0);
-  const q2hy1 = p(dist.q2Test["Hybrid"], n1);
-
-  const q1ka0 = p(dist.q1Control["Kantar"], n0);
-  const q1ka1 = p(dist.q1Test["Kantar"], n1);
-
-  const q1fp0 = p(dist.q1Control["First-party"], n0);
-  const q1fp1 = p(dist.q1Test["First-party"], n1);
-
-  const highlight = [
-    { label: "Sample size (Control)", value: String(n0), small: `cid=${CID_CONTROL}` },
-    { label: "Sample size (Test)", value: String(n1), small: `cid=${CID_TEST}` },
-    { label: "Lift · Q2 First-party", value: formatPP(q2fp1 - q2fp0), small: `${formatPct(q2fp0)} → ${formatPct(q2fp1)}` },
-    { label: "Lift · Q1 Kantar", value: formatPP(q1ka1 - q1ka0), small: `${formatPct(q1ka0)} → ${formatPct(q1ka1)}` },
-  ];
-
-  const el = $("summaryCards");
-  el.innerHTML = highlight.map(c => `
-    <div class="card">
-      <div class="label">${c.label}</div>
-      <div class="value">${c.value}</div>
-      <div class="small">${c.small}</div>
-    </div>
-  `).join("");
+    const rel = liftRel(t.p, c.p);
+    // Display like Microsoft cards: big number = lift %, rows = Treatment/Control rates
+    setText(kpi.ui.kpi, formatLiftRel(rel));
+    setText(kpi.ui.control, pct(c.p));
+    setText(kpi.ui.treatment, pct(t.p));
+  }
 }
 
-function renderTable(rows) {
-  const tbody = $("metricsTable").querySelector("tbody");
-  tbody.innerHTML = rows.map(r => {
-    const lift = r.lift;
-    const badge = (lift > 0.02 && r.p < 0.05) ? "good" : (r.p < 0.05 ? "warn" : "bad");
-    const dotClass = badge === "good" ? "good" : badge === "warn" ? "warn" : "bad";
+function renderTable(metricRows) {
+  const table = $("metricsTable");
+  if (!table) return;
+
+  const tbody = table.querySelector("tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = metricRows.map(m => {
+    const confClass = m.confidence.toLowerCase(); // high/medium/low
+    const confBadge = `<span class="badge ${confClass}">${m.confidence}</span>`;
     return `
       <tr>
-        <td>
-          <span class="badge"><span class="dot ${dotClass}"></span>${r.name}</span>
-        </td>
-        <td>${formatPct(r.control)}</td>
-        <td>${formatPct(r.test)}</td>
-        <td>${formatPP(r.lift)}</td>
-        <td>${formatPP(r.ciLo)} to ${formatPP(r.ciHi)}</td>
-        <td>${formatPValue(r.p)}</td>
+        <td>${m.name}</td>
+        <td>${pct(m.controlP)}</td>
+        <td>${pct(m.treatmentP)}</td>
+        <td>${formatLiftRel(m.relLift)}</td>
+        <td>${formatLiftRel(m.relLo)} to ${formatLiftRel(m.relHi)}</td>
+        <td>${formatPValue(m.pValue)} ${confBadge}</td>
       </tr>
     `;
   }).join("");
 }
 
+// Optional: a short “platform-like” recommendations block if you have a div#reco
 function renderRecommendations(metricRows) {
-  // pick significant lifts
+  const el = $("reco");
+  if (!el) return;
+
   const sig = metricRows
-    .filter(r => r.p < 0.05)
-    .sort((a,b) => Math.abs(b.lift) - Math.abs(a.lift))
+    .filter(m => m.pValue < 0.05)
+    .sort((a,b) => Math.abs(b.relLift) - Math.abs(a.relLift))
     .slice(0, 4);
 
-  const el = $("reco");
   if (!sig.length) {
-    el.innerHTML = `<div class="reco-item"><h4>No statistically significant lifts</h4><p>Increase sample size and/or refine targeting for stronger signal.</p></div>`;
+    el.innerHTML = `
+      <div class="reco-item">
+        <h4>No statistically significant lifts</h4>
+        <p>Increase sample size and/or refine targeting to improve signal strength.</p>
+      </div>
+    `;
     return;
   }
 
-  el.innerHTML = sig.map(r => {
-    const direction = r.lift >= 0 ? "increased" : "decreased";
-    const magnitude = formatPP(r.lift);
+  el.innerHTML = sig.map(m => {
+    const dir = m.relLift >= 0 ? "higher" : "lower";
     return `
       <div class="reco-item">
-        <h4>${r.name}: ${magnitude} (${direction})</h4>
+        <h4>${m.name}</h4>
         <p>
-          The Test cohort differs from Control by <b>${magnitude}</b> (95% CI ${formatPP(r.ciLo)} to ${formatPP(r.ciHi)}, p=${formatPValue(r.p)}).
-          Consider aligning messaging and measurement packaging to reinforce this preference.
+          Treatment shows <b>${formatLiftRel(m.relLift)}</b> ${dir} rate vs Control
+          (95% CI ${formatLiftRel(m.relLo)} to ${formatLiftRel(m.relHi)}, p=${formatPValue(m.pValue)}, confidence: ${m.confidence}).
         </p>
       </div>
     `;
   }).join("");
 }
 
-function renderCharts(dist) {
-  const { n0, n1 } = dist;
+// ====== load ======
+async function loadCsvRows() {
+  // cache buster helps while iterating on GitHub Pages
+  const url = SHEET_CSV_URL + (SHEET_CSV_URL.includes("?") ? "&" : "?") + "cb=" + Date.now();
 
-  // Q2 dist chart (stacked bars per cohort)
-  const q2Labels = Q2_OPTIONS;
-  const q2ControlPct = q2Labels.map(k => dist.q2Control[k] / n0);
-  const q2TestPct = q2Labels.map(k => dist.q2Test[k] / n1);
-
-  destroyChart(q2DistChart);
-  q2DistChart = new Chart($("q2DistChart"), {
-    type: "bar",
-    data: {
-      labels: q2Labels,
-      datasets: [
-        { label: "Control", data: q2ControlPct },
-        { label: "Test", data: q2TestPct }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { labels: { color: "#e7eefc" } },
-        tooltip: {
-          callbacks: { label: (ctx) => `${ctx.dataset.label}: ${(ctx.raw*100).toFixed(1)}%` }
-        }
-      },
-      scales: {
-        x: { ticks: { color: "#e7eefc" }, grid: { color: "rgba(231,238,252,.08)" } },
-        y: { ticks: { color: "#e7eefc", callback: v => (v*100) + "%" }, grid: { color: "rgba(231,238,252,.08)" }, suggestedMax: 1 }
-      }
-    }
-  });
-
-  $("q2Foot").textContent = `n(Control)=${n0}, n(Test)=${n1}.`;
-
-  // Q2 lift chart
-  const q2Lift = q2Labels.map(k => (dist.q2Test[k]/n1) - (dist.q2Control[k]/n0));
-  destroyChart(q2LiftChart);
-  q2LiftChart = new Chart($("q2LiftChart"), {
-    type: "bar",
-    data: { labels: q2Labels, datasets: [{ label: "Lift (Test − Control)", data: q2Lift }] },
-    options: {
-      plugins: { legend: { labels: { color: "#e7eefc" } } },
-      scales: {
-        x: { ticks: { color: "#e7eefc" }, grid: { color: "rgba(231,238,252,.08)" } },
-        y: {
-          ticks: { color: "#e7eefc", callback: v => (v*100).toFixed(0) + " pp" },
-          grid: { color: "rgba(231,238,252,.08)" }
-        }
-      }
-    }
-  });
-
-  // Q1 provider lift chart
-  const q1Labels = Q1_PROVIDERS;
-  const q1Lift = q1Labels.map(p => (dist.q1Test[p]/n1) - (dist.q1Control[p]/n0));
-  destroyChart(q1LiftChart);
-  q1LiftChart = new Chart($("q1LiftChart"), {
-    type: "bar",
-    data: { labels: q1Labels, datasets: [{ label: "Lift (Test − Control)", data: q1Lift }] },
-    options: {
-      plugins: { legend: { labels: { color: "#e7eefc" } } },
-      scales: {
-        x: { ticks: { color: "#e7eefc" }, grid: { color: "rgba(231,238,252,.08)" } },
-        y: { ticks: { color: "#e7eefc", callback: v => (v*100).toFixed(0) + " pp" }, grid: { color: "rgba(231,238,252,.08)" } }
-      }
-    }
-  });
-
-  $("q1Foot").textContent = `Q1 is multi-select; each provider is measured as selected vs not selected.`;
-
-  // Q3 themes chart (combined test+control for overview)
-  const combined = {};
-  for (const [k,v] of Object.entries(dist.q3Control)) combined[k] = (combined[k] || 0) + v;
-  for (const [k,v] of Object.entries(dist.q3Test)) combined[k] = (combined[k] || 0) + v;
-
-  const themeLabels = Object.entries(combined)
-    .sort((a,b) => b[1] - a[1])
-    .slice(0, 7)
-    .map(([k]) => k);
-
-  const themeControl = themeLabels.map(k => dist.q3Control[k] || 0);
-  const themeTest = themeLabels.map(k => dist.q3Test[k] || 0);
-
-  destroyChart(q3ThemesChart);
-  q3ThemesChart = new Chart($("q3ThemesChart"), {
-    type: "bar",
-    data: {
-      labels: themeLabels,
-      datasets: [
-        { label: "Control", data: themeControl },
-        { label: "Test", data: themeTest }
-      ]
-    },
-    options: {
-      plugins: { legend: { labels: { color: "#e7eefc" } } },
-      scales: {
-        x: { ticks: { color: "#e7eefc" }, grid: { color: "rgba(231,238,252,.08)" } },
-        y: { ticks: { color: "#e7eefc" }, grid: { color: "rgba(231,238,252,.08)" } }
-      }
-    }
-  });
-}
-
-function buildMetricRows(dist) {
-  const { n0, n1 } = dist;
-  const rows = [];
-
-  // Q2 metrics
-  for (const opt of Q2_OPTIONS) {
-    const p0 = dist.q2Control[opt] / n0;
-    const p1 = dist.q2Test[opt] / n1;
-    rows.push(metricRow(`Q2 · ${opt}`, p0, n0, p1, n1));
-  }
-
-  // Q1 provider metrics
-  for (const prov of Q1_PROVIDERS) {
-    const p0 = dist.q1Control[prov] / n0;
-    const p1 = dist.q1Test[prov] / n1;
-    rows.push(metricRow(`Q1 · Selected ${prov}`, p0, n0, p1, n1));
-  }
-
-  return rows;
-}
-
-// ====== LOAD & RUN ======
-async function loadAndRender() {
-  setStatus("Loading data from Google Sheets…");
-
-  const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`Failed to load CSV: ${res.status} ${res.statusText}`);
-  const csvText = await res.text();
+  const text = await res.text();
+  return parseCsv(text);
+}
 
-  const rows = parseCsv(csvText);
+async function loadAndRender() {
+  setStatus("Loading data…");
 
-  // Filter to the creative id if you want (optional)
-  // const rowsFiltered = rows.filter(r => r.crid === "715479442");
-  const rowsFiltered = rows;
+  const rows = await loadCsvRows();
 
-  const control = rowsFiltered.filter(r => (r.cid || "").trim() === CID_CONTROL);
-  const test = rowsFiltered.filter(r => (r.cid || "").trim() === CID_TEST);
+  // Normalize column names if needed (in case header casing differs)
+  // Expecting: ts, cid, crid, q1, q2, q3
+  const normalized = rows.map(r => ({
+    ts: r.ts ?? r.TS ?? r.Timestamp ?? "",
+    cid: r.cid ?? r.CID ?? "",
+    crid: r.crid ?? r.CRID ?? "",
+    q1: r.q1 ?? r.Q1 ?? "",
+    q2: r.q2 ?? r.Q2 ?? "",
+    q3: r.q3 ?? r.Q3 ?? ""
+  }));
 
-  if (!control.length || !test.length) {
-    throw new Error(`Missing cohort data. Found control=${control.length}, test=${test.length}. Check cid values and sheet tab name.`);
+  const control = normalized.filter(r => (r.cid || "").trim() === CID_CONTROL);
+  const treatment = normalized.filter(r => (r.cid || "").trim() === CID_TREATMENT);
+
+  if (!control.length || !treatment.length) {
+    throw new Error(
+      `Missing cohort data. Control=${control.length}, Treatment=${treatment.length}. ` +
+      `Check SHEET_TAB and cid values.`
+    );
   }
 
-  const dist = computeDistributions(control, test);
-  renderSummary(dist);
+  renderKPIs(control, treatment);
 
-  const metricRows = buildMetricRows(dist);
+  const metricRows = buildMetricRows(control, treatment);
   renderTable(metricRows);
   renderRecommendations(metricRows);
-  renderCharts(dist);
 
-  setStatus(`Loaded ${rowsFiltered.length} rows. Control=${control.length}, Test=${test.length}.`);
+  setStatus(`Loaded ${normalized.length} rows. Control=${control.length}, Treatment=${treatment.length}.`);
 }
 
-$("refreshBtn").addEventListener("click", () => {
-  loadAndRender().catch(err => {
-    console.error(err);
-    setStatus("Error: " + (err.message || String(err)));
+// Wire refresh button if present
+const refreshBtn = $("refreshBtn");
+if (refreshBtn) {
+  refreshBtn.addEventListener("click", () => {
+    loadAndRender().catch(err => {
+      console.error(err);
+      setStatus("Error: " + (err.message || String(err)));
+    });
   });
-});
+}
 
 // Initial load
 loadAndRender().catch(err => {
   console.error(err);
-  setStatus("Error: " + (err.message || String(err)) + " (Check sheet sharing + tab name)");
+  setStatus("Error: " + (err.message || String(err)) + " — If you see 'Failed to fetch', use Publish-to-web CSV URL.");
 });
