@@ -1,11 +1,11 @@
 // ====== CONFIG ======
-const SHEET_ID = "14B-lJ09Seqd2ypmDbCPUm0OgVMVnofOPV3lFCoK3OqQ";
+//const SHEET_ID = "14B-lJ09Seqd2ypmDbCPUm0OgVMVnofOPV3lFCoK3OqQ";
 
 // Put your tab name here (e.g., "Sheet1"). If unsure, open the Sheet and read the bottom tab label.
-const SHEET_TAB = "responses";
+//const SHEET_TAB = "responses";
 
 // Google Sheets CSV export URL (no auth required if the sheet is shared / published)
-const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_TAB)}`;
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSh01ccfdoMhKLf04m30buSVkBUtNzX7Zk3UXb9Ft7or2HteK_VKDei4VHsisT8nXSr8W7AjBIN4D0j/pub?output=csv";
 
 // Cohorts
 const CID_CONTROL = "31150957";
