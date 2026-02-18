@@ -1,59 +1,348 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Survey Ad</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daily Ledger — News Demo + Xandr 300×600</title>
 
-  <body>
-    <div class="ad" role="application" aria-label="Mini questionnaire">
-      <header class="header">
-        <div class="brand">Survey</div>
-        <button class="cta-link" type="button" id="ctaClick">En savoir plus</button>
-      </header>
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#101828;
+      --muted:#667085;
+      --border:rgba(16,24,40,.12);
+      --shadow:0 8px 24px rgba(16,24,40,.08);
+      --accent:#2563eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:var(--card);
+      border-bottom:1px solid var(--border);
+    }
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .logo{
+      display:flex; align-items:baseline; gap:10px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+    .logo span{color:var(--accent)}
+    .nav{
+      display:flex; gap:14px; flex-wrap:wrap;
+      font-size:14px; color:var(--muted);
+    }
+    .nav a{ text-decoration:none; padding:6px 8px; border-radius:10px;}
+    .nav a:hover{ background:rgba(37,99,235,.08); color:var(--text);}
 
-      <main class="content">
-        <h1 class="title">3 questions rapides</h1>
-        <p class="subtitle">Réponds en quelques secondes.</p>
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 16px 60px;
+      display:grid;
+      grid-template-columns: 1fr 340px; /* contenu + sidebar */
+      gap:18px;
+    }
+    @media (max-width: 980px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
 
-        <form id="surveyForm" class="form" autocomplete="off">
-          <div class="field">
-            <label for="q1" class="label">1) Quelle est ta priorité du moment ?</label>
-            <input id="q1" name="q1" type="text" class="input" maxlength="120" placeholder="Ta réponse…" />
-          </div>
+    .hero{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .hero-img{
+      height:210px;
+      background:linear-gradient(120deg, rgba(37,99,235,.35), rgba(16,24,40,.05));
+    }
+    .hero-body{ padding:16px; }
+    .kicker{ color:var(--accent); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;}
+    h1{ margin:8px 0 8px; font-size:26px; line-height:1.15;}
+    .sub{ margin:0; color:var(--muted); font-size:14px; line-height:1.45;}
 
-          <div class="field">
-            <label for="q2" class="label">2) Quel produit/services utilises-tu le plus ?</label>
-            <input id="q2" name="q2" type="text" class="input" maxlength="120" placeholder="Ta réponse…" />
-          </div>
+    .grid{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:14px;
+    }
+    @media (max-width: 760px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:14px;
+      display:grid;
+      gap:8px;
+    }
+    .meta{ font-size:12px; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap;}
+    .title{ font-size:16px; font-weight:750; margin:0; }
+    .excerpt{ margin:0; color:var(--muted); font-size:13px; line-height:1.45; }
 
-          <div class="field">
-            <label for="q3" class="label">3) Qu’est-ce qui te ferait gagner du temps ?</label>
-            <input id="q3" name="q3" type="text" class="input" maxlength="120" placeholder="Ta réponse…" />
-          </div>
+    .sidebar{
+      display:grid;
+      gap:14px;
+      align-content:start;
+    }
+    .sidecard{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .sidecard h2{ margin:0 0 10px; font-size:14px; }
+    .tag{
+      display:inline-block;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(37,99,235,.08);
+      color:var(--accent);
+      font-weight:650;
+      margin:0 6px 8px 0;
+    }
 
-          <div class="actions">
-            <button id="sendBtn" class="btn" type="submit">Send</button>
-            <div id="status" class="status" aria-live="polite"></div>
-          </div>
+    /* ===== Ad slot 300x600 ===== */
+    .ad-wrap{ display:grid; gap:8px; }
+    .ad-label{
+      font-size:11px;
+      color:var(--muted);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .ad-slot{
+      width:300px;
+      height:600px;
+      border:1px dashed rgba(16,24,40,.25);
+      border-radius:12px;
+      background:linear-gradient(180deg, rgba(16,24,40,.02), rgba(16,24,40,.00));
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+    }
+    .ad-fallback{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+      padding:10px;
+      line-height:1.35;
+    }
+    code{ background:rgba(16,24,40,.06); padding:2px 6px; border-radius:8px; }
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--card);
+      padding:18px 16px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .footer-inner{ max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  </style>
 
-          <p class="fineprint">En envoyant, tes réponses sont enregistrées de manière anonyme.</p>
-        </form>
+  <!-- ===== XANDR AST RUNTIME (clean integration) ===== -->
+  <script async src="https://acdn.adnxs.com/ast/ast.js"></script>
+  <script>
+    // Your IDs
+    window.__XANDR_CONFIG = {
+      placementId: 37217254,
+      memberId: 958,
+      size: [300, 600],
+      debug: true
+    };
+  </script>
+</head>
 
-        <div id="thankYou" class="thankyou" hidden>
-          <div class="check">✓</div>
-          <div class="thanks-title">Merci !</div>
-          <div class="thanks-subtitle">Tes réponses ont bien été envoyées.</div>
-        </div>
-      </main>
-
-      <footer class="footer">
-        <span class="hint">Astuce : appuie sur Entrée pour envoyer.</span>
-      </footer>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">Daily <span>Ledger</span></div>
+      <nav class="nav">
+        <a href="#">À la une</a>
+        <a href="#">Tech</a>
+        <a href="#">Économie</a>
+        <a href="#">Monde</a>
+        <a href="#">Culture</a>
+        <a href="#">Sport</a>
+      </nav>
     </div>
+  </div>
 
-    <script src="main.js"></script>
-  </body>
+  <div class="wrap">
+    <main>
+      <section class="hero">
+        <div class="hero-img"></div>
+        <div class="hero-body">
+          <div class="kicker">Breaking</div>
+          <h1>Démo éditeur : rendu d’une créa HTML5 interactive en Direct (Xandr Monetize)</h1>
+          <p class="sub">
+            Cette page simule un site de news avec un encart pub <b>300×600</b> à droite, servi via le runtime officiel AST.
+          </p>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="Articles">
+        <article class="card">
+          <div class="meta"><span>Tech</span><span>•</span><span>Il y a 2h</span></div>
+          <h3 class="title">Publicité interactive : les patterns qui marchent</h3>
+          <p class="excerpt">Questionnaire court, UI claire, soumission “best-effort” et tracking minimal pour prototyper vite.</p>
+        </article>
+
+        <article class="card">
+          <div class="meta"><span>Économie</span><span>•</span><span>Il y a 4h</span></div>
+          <h3 class="title">Pourquoi le 300×600 est idéal pour un survey</h3>
+          <p class="excerpt">Haute visibilité et assez de place pour 3 questions sans dégrader l’expérience utilisateur.</p>
+        </article>
+
+        <article class="card">
+          <div class="meta"><span>Monde</span><span>•</span><span>Hier</span></div>
+          <h3 class="title">Privacy : prototyper sans données sensibles</h3>
+          <p class="excerpt">Réponses anonymes + timestamp + ids de campagne suffisent pour un POC robuste.</p>
+        </article>
+
+        <article class="card">
+          <div class="meta"><span>Culture</span><span>•</span><span>Hier</span></div>
+          <h3 class="title">Design : la lisibilité avant tout</h3>
+          <p class="excerpt">Contraste, hiérarchie typographique et CTA clair sont les clés d’un bon taux de complétion.</p>
+        </article>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidecard ad-wrap">
+        <div class="ad-label">Publicité</div>
+
+        <!-- AST will render the creative inside this container -->
+        <div class="ad-slot" id="ad-300x600">
+          <div class="ad-fallback">
+            Chargement de la publicité…
+            <br/><br/>
+            Si rien ne s’affiche : vérifie que la campagne/line item est live,
+            que le placement accepte ce domaine, et que la taille est bien 300×600.
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);line-height:1.4">
+          Config : placement <code>37217254</code>, member <code>958</code>.
+          (Tu peux activer <code>debug</code> dans <code>__XANDR_CONFIG</code> si besoin.)
+        </div>
+      </div>
+
+      <div class="sidecard">
+        <h2>Trending</h2>
+        <span class="tag">Interactive Ads</span>
+        <span class="tag">HTML5</span>
+        <span class="tag">Survey</span>
+        <span class="tag">Brand Lift</span>
+      </div>
+
+      <div class="sidecard">
+        <h2>Newsletter</h2>
+        <p class="excerpt">Reçois le brief des meilleures campagnes testées cette semaine.</p>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <input type="email" placeholder="email@domain.com"
+                 style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--border);" />
+          <button style="padding:10px 12px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:700; cursor:pointer;">
+            OK
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div>© 2026 Daily Ledger — Page de démo.</div>
+      <div>Slot pub: <code>300×600</code> • AST: <code>acdn.adnxs.com/ast/ast.js</code></div>
+    </div>
+  </footer>
+
+<script>
+(function () {
+  const cfg = window.__XANDR_CONFIG || {};
+  const TARGET = "ad-300x600";
+
+  function log(...a){ console.log("%c[AST]", "color:#2563eb;font-weight:700", ...a); }
+  function warn(...a){ console.warn("[AST]", ...a); }
+
+  function init() {
+    const el = document.getElementById(TARGET);
+    if (!el) {
+      warn("Target element not found:", TARGET);
+      return;
+    }
+
+    window.apntag = window.apntag || {};
+    window.apntag.anq = window.apntag.anq || [];
+
+    window.apntag.anq.push(function () {
+      try {
+        window.apntag.debug = true;
+
+        log("setPageOpts", { member: cfg.memberId });
+        window.apntag.setPageOpts({ member: cfg.memberId });
+
+        // Event hooks (super utile)
+        if (window.apntag.onEvent) {
+          ["adRequested","adAvailable","adLoaded","adNoBid","adError"].forEach(evt => {
+            window.apntag.onEvent(evt, (e) => log("EVENT:", evt, e));
+          });
+        } else {
+          warn("apntag.onEvent not available in this AST build");
+        }
+
+        log("defineTag", { tagId: cfg.placementId, size: cfg.size, targetId: TARGET });
+        window.apntag.defineTag({
+          tagId: cfg.placementId,
+          sizes: [cfg.size],
+          targetId: TARGET,
+          disablePsa: true
+        });
+
+        log("loadTags()");
+        window.apntag.loadTags();
+
+        // Post-check: did we get an iframe?
+        setTimeout(() => {
+          const ifr = el.querySelector("iframe");
+          log("DOM after loadTags → iframe?", !!ifr, ifr || "");
+        }, 800);
+
+      } catch (err) {
+        console.error("[AST] init error", err);
+      }
+    });
+  }
+
+  // Important: run after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
 </html>
+
