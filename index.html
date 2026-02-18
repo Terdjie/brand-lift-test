@@ -302,10 +302,74 @@
   function log(...a){ console.log("%c[AST]", "color:#2563eb;font-weight:700", ...a); }
   function warn(...a){ console.warn("[AST]", ...a); }
 
+  // ===== UI badge helpers =====
+  function setBadge(state, details) {
+    const title = document.getElementById("ast-title");
+    const dot = document.getElementById("ast-dot");
+    const det = document.getElementById("ast-details");
+    if (!title || !dot || !det) return;
+
+    const colors = {
+      INIT: "#94a3b8",
+      REQUESTED: "#a78bfa",
+      AVAILABLE: "#22c55e",
+      LOADED: "#38bdf8",
+      NOBID: "#f59e0b",
+      ERROR: "#ef4444"
+    };
+
+    title.textContent = "AST: " + state;
+    dot.style.background = colors[state] || colors.INIT;
+    det.textContent = details || "";
+  }
+
+  function fmtEvent(e) {
+    if (!e) return "";
+    const parts = [];
+    if (e.tagId) parts.push("tagId=" + e.tagId);
+    if (e.targetId) parts.push("target=" + e.targetId);
+    // depending on AST build, these can exist:
+    if (e.auctionId) parts.push("auctionId=" + e.auctionId);
+    if (e.creativeId) parts.push("creativeId=" + e.creativeId);
+    if (e.cpm != null) parts.push("cpm=" + e.cpm);
+    if (e.adType) parts.push("adType=" + e.adType);
+    if (e.error) parts.push("error=" + e.error);
+    return parts.join(" • ");
+  }
+
+  function ensureBadge() {
+    if (document.getElementById("ast-status")) return;
+
+    const box = document.createElement("div");
+    box.id = "ast-status";
+    box.style.cssText = [
+      "position:fixed","top:12px","right:12px","z-index:99999",
+      "font:12px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif",
+      "padding:10px 12px","border-radius:12px",
+      "background:rgba(16,24,40,.92)","color:white",
+      "box-shadow:0 10px 30px rgba(0,0,0,.25)",
+      "max-width:340px","word-break:break-word"
+    ].join(";");
+
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="ast-dot" style="width:10px;height:10px;border-radius:999px;background:#94a3b8;display:inline-block;"></span>
+        <strong id="ast-title">AST: INIT</strong>
+      </div>
+      <div id="ast-details" style="margin-top:6px;opacity:.9;">Waiting…</div>
+    `;
+
+    document.body.appendChild(box);
+  }
+
   function init() {
+    ensureBadge();
+    setBadge("INIT", "Waiting for AST…");
+
     const el = document.getElementById(TARGET);
     if (!el) {
       warn("Target element not found:", TARGET);
+      setBadge("ERROR", "Target element not found: " + TARGET);
       return;
     }
 
@@ -319,15 +383,7 @@
         log("setPageOpts", { member: cfg.memberId });
         window.apntag.setPageOpts({ member: cfg.memberId });
 
-        // Event hooks (super utile)
-        if (window.apntag.onEvent) {
-          ["adRequested","adAvailable","adLoaded","adNoBid","adError"].forEach(evt => {
-            window.apntag.onEvent(evt, (e) => log("EVENT:", evt, e));
-          });
-        } else {
-          warn("apntag.onEvent not available in this AST build");
-        }
-
+        // Define tag
         log("defineTag", { tagId: cfg.placementId, size: cfg.size, targetId: TARGET });
         window.apntag.defineTag({
           tagId: cfg.placementId,
@@ -336,22 +392,65 @@
           disablePsa: true
         });
 
+        // Event hooks -> update badge
+        if (window.apntag.onEvent) {
+          window.apntag.onEvent("adRequested", function(e){
+            log("EVENT: adRequested", e);
+            setBadge("REQUESTED", fmtEvent(e) || "Request sent");
+          });
+
+          window.apntag.onEvent("adAvailable", function(e){
+            log("EVENT: adAvailable", e);
+            setBadge("AVAILABLE", fmtEvent(e) || "Ad available");
+          });
+
+          window.apntag.onEvent("adLoaded", function(e){
+            log("EVENT: adLoaded", e);
+            setBadge("LOADED", fmtEvent(e) || "Ad loaded");
+          });
+
+          window.apntag.onEvent("adNoBid", function(e){
+            log("EVENT: adNoBid", e);
+            setBadge("NOBID", fmtEvent(e) || "No bid");
+          });
+
+          window.apntag.onEvent("adError", function(e){
+            log("EVENT: adError", e);
+            setBadge("ERROR", fmtEvent(e) || "Ad error");
+          });
+        } else {
+          warn("apntag.onEvent not available in this AST build");
+          setBadge("ERROR", "apntag.onEvent not available");
+        }
+
+        // Request tags
         log("loadTags()");
+        setBadge("REQUESTED", "Loading tags…");
         window.apntag.loadTags();
 
-        // Post-check: did we get an iframe?
-        setTimeout(() => {
-          const ifr = el.querySelector("iframe");
-          log("DOM after loadTags → iframe?", !!ifr, ifr || "");
-        }, 800);
+        // Post-check: did we get an iframe? (check multiple times; mobile can be slower)
+        [800, 3000, 6000].forEach((ms) => {
+          setTimeout(() => {
+            const ifr = el.querySelector("iframe");
+            log(`DOM after loadTags (${ms}ms) → iframe?`, !!ifr, ifr || "");
+            // If we have AVAILABLE but no iframe, this helps you spot "render blocked"
+            const title = document.getElementById("ast-title")?.textContent || "";
+            if (!ifr && (title.includes("AVAILABLE") || title.includes("LOADED"))) {
+              const r = el.getBoundingClientRect();
+              const inView = r.top < window.innerHeight && r.bottom > 0;
+              setBadge(title.replace("AST: ",""), `No iframe yet • slot=${Math.round(r.width)}x${Math.round(r.height)} • inView=${inView}`);
+            }
+          }, ms);
+        });
 
       } catch (err) {
         console.error("[AST] init error", err);
+        setBadge("ERROR", String(err && err.message ? err.message : err));
       }
     });
   }
 
-  // Important: run after DOM is ready
+  // Run after DOM ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
@@ -360,7 +459,9 @@
 })();
 </script>
 
+
 </body>
 </html>
+
 
 
