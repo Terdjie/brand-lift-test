@@ -408,11 +408,24 @@ body{
 .choices__head{display:flex;gap:12px;align-items:center}
 .choices__list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
 .choice-row{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 10px;
+  display:inline-flex;       /* <-- important */
+  align-items:center;
+  gap:10px;
+  padding:6px 10px;
   border:1px solid var(--border);
   border-radius:6px;
   background:#fff;
+  max-width:100%;
+}
+
+/* Prevent text from stretching the container */
+.choice-row > div{
+  white-space:nowrap;
+}
+
+/* Keep the X properly spaced */
+.choice-row .chip__x{
+  margin-left:4px;
 }
 
 /* Confirmation */
