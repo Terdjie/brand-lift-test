@@ -342,7 +342,17 @@ body{
   align-items:center;
   padding:12px 2px 0;
 }
-.pager{display:flex;gap:10px;align-items:center}
+.pager{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:nowrap;      /* <- prevents line breaks */
+  white-space:nowrap;    /* <- prevents text wrapping */
+}
+.pager .muted{
+  white-space:nowrap;
+}
+
 .muted{color:var(--muted)}
 .small{font-size:12px}
 .hint{margin-top:12px}
