@@ -414,7 +414,8 @@ body{
   padding:6px 10px;
   border:1px solid var(--border);
   border-radius:6px;
-  background:#fff;
+  background:#fafafa;
+  border-color:#edebe9;
   max-width:100%;
 }
 
