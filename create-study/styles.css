@@ -464,3 +464,31 @@ body{
   .toolbar__search{min-width:240px}
   .grid-2{grid-template-columns:1fr}
 }
+
+/* Ensure the selected campaign chips never overflow the summary card */
+.summary .chips{
+  max-width: 100%;
+}
+
+.summary .chip{
+  max-width: 100%;
+  width: 100%;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Let the name truncate instead of overflowing */
+.summary .chip .truncate{
+  flex:1;
+  min-width:0;              /* IMPORTANT: allows flex item to shrink */
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Keep the "x" visible and prevent it from shrinking */
+.summary .chip__x{
+  flex:0 0 auto;
+}
