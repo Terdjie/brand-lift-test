@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Brand Lift Studies | Microsoft Advertising (Prototype)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="ms-logo" aria-hidden="true"></div>
+        <div class="topbar__brand">Microsoft Advertising</div>
+        <div class="account-pill" title="Advertiser account">
+          Microsoft <span class="account-pill__sub">• Brand Lift Survey</span>
+        </div>
+      </div>
+      <div class="topbar__center">
+        <div class="search">
+          <span class="search__icon" aria-hidden="true">⌕</span>
+          <input id="globalSearch" class="search__input" placeholder="Search Microsoft Advertising" />
+        </div>
+      </div>
+      <div class="topbar__right">
+        <button class="icon-btn" title="Help" aria-label="Help">?</button>
+        <button class="icon-btn" title="Notifications" aria-label="Notifications">🔔</button>
+        <div class="user-chip" title="Signed in">
+          <span class="user-chip__avatar" aria-hidden="true"></span>
+          <span class="user-chip__email">dterdjman@microsoft.com</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidenav" aria-label="Primary navigation">
+        <div class="sidenav__item">
+          <span class="sidenav__icon">＋</span>
+          <span class="sidenav__text">Create</span>
+        </div>
+        <div class="sidenav__item">
+          <span class="sidenav__icon">📣</span>
+          <span class="sidenav__text">Campaigns</span>
+        </div>
+        <div class="sidenav__item">
+          <span class="sidenav__icon">🎯</span>
+          <span class="sidenav__text">Conversions</span>
+        </div>
+        <div class="sidenav__item sidenav__item--active">
+          <span class="sidenav__icon">📈</span>
+          <span class="sidenav__text">Brand Lift</span>
+        </div>
+        <div class="sidenav__spacer"></div>
+        <div class="sidenav__item">
+          <span class="sidenav__icon">⚙️</span>
+          <span class="sidenav__text">Settings</span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="page-header">
+          <h1 class="page-title">Brand Lift Studies</h1>
+        </div>
+
+        <section class="card">
+          <div class="toolbar">
+            <button class="btn btn--primary" id="goCreate">
+              <span class="btn__icon" aria-hidden="true">＋</span>
+              Create
+            </button>
+
+            <div class="toolbar__filters">
+              <label class="field field--inline">
+                <span class="field__label">Statuses</span>
+                <select id="filterStatus" class="select">
+                  <option value="all">All</option>
+                  <option value="ongoing">Ongoing</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </label>
+
+              <label class="field field--inline">
+                <span class="field__label">Countries</span>
+                <select id="filterCountry" class="select">
+                  <option value="all">All</option>
+                  <option value="United States">United States</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="toolbar__search">
+              <div class="search search--compact">
+                <span class="search__icon" aria-hidden="true">⌕</span>
+                <input id="filterName" class="search__input" placeholder="Search by study name" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table" aria-label="Brand lift studies table">
+              <thead>
+                <tr>
+                  <th class="col-name">Study name</th>
+                  <th class="col-status">Status</th>
+                  <th class="col-campaigns">Campaigns</th>
+                  <th class="col-dates">Study Dates</th>
+                  <th class="col-country">Country</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studiesTbody"></tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="muted" id="studiesCount">4 studies</div>
+            <div class="pager">
+              <span class="muted">Rows per page:</span>
+              <select class="select select--sm" disabled>
+                <option selected>10</option>
+              </select>
+              <span class="muted">1 of 1</span>
+              <button class="icon-btn" disabled aria-label="Previous page">‹</button>
+              <button class="icon-btn" disabled aria-label="Next page">›</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="hint muted">
+          Prototype note: filtering is local (client-side) and studies are seeded for demo.
+        </div>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
