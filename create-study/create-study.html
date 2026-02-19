@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Create Brand Lift Study | Microsoft Advertising (Prototype)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="ms-logo" aria-hidden="true"></div>
+        <div class="topbar__brand">Microsoft Advertising</div>
+        <div class="account-pill">
+          Microsoft <span class="account-pill__sub">• Brand Lift Survey</span>
+        </div>
+      </div>
+      <div class="topbar__center">
+        <div class="search">
+          <span class="search__icon" aria-hidden="true">⌕</span>
+          <input class="search__input" placeholder="Search Microsoft Advertising" />
+        </div>
+      </div>
+      <div class="topbar__right">
+        <button class="icon-btn" title="Help" aria-label="Help">?</button>
+        <button class="icon-btn" title="Notifications" aria-label="Notifications">🔔</button>
+        <div class="user-chip">
+          <span class="user-chip__avatar" aria-hidden="true"></span>
+          <span class="user-chip__email">dterdjman@microsoft.com</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidenav" aria-label="Primary navigation">
+        <div class="sidenav__item sidenav__item--active">
+          <span class="sidenav__icon">📈</span>
+          <span class="sidenav__text">Brand Lift</span>
+        </div>
+        <div class="sidenav__item">
+          <span class="sidenav__icon">📣</span>
+          <span class="sidenav__text">Campaigns</span>
+        </div>
+        <div class="sidenav__spacer"></div>
+        <div class="sidenav__item">
+          <span class="sidenav__icon">⚙️</span>
+          <span class="sidenav__text">Settings</span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="page-header">
+          <h1 class="page-title">Create Brand Lift Study</h1>
+          <p class="subtitle">
+            Choose one or more campaigns for this study. Disabled campaigns are ineligible and cannot be selected.
+          </p>
+        </div>
+
+        <div class="split">
+          <section class="card split__main">
+            <div class="toolbar toolbar--soft">
+              <div class="search search--compact" style="max-width: 340px;">
+                <span class="search__icon" aria-hidden="true">⌕</span>
+                <input id="campaignSearch" class="search__input" placeholder="Search campaigns" />
+              </div>
+
+              <div class="toolbar__filters">
+                <label class="field field--inline">
+                  <span class="field__label">Campaign types</span>
+                  <select class="select" disabled>
+                    <option>Display, Native</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table" aria-label="Campaign selection table">
+                <thead>
+                  <tr>
+                    <th class="col-check">
+                      <input id="selectAllEligible" type="checkbox" class="checkbox" aria-label="Select all eligible" />
+                    </th>
+                    <th>Campaign name</th>
+                    <th>Campaign type</th>
+                    <th>Status</th>
+                    <th>Budget per day</th>
+                    <th>Campaign eligibility</th>
+                  </tr>
+                </thead>
+                <tbody id="campaignsTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="footer-actions">
+              <button class="btn" id="backToList">Back</button>
+              <div class="footer-actions__right">
+                <button class="btn" id="cancelCreate">Cancel</button>
+                <button class="btn btn--primary" id="nextToForm" disabled>Next</button>
+              </div>
+            </div>
+          </section>
+
+          <aside class="card split__side" aria-label="Study summary">
+            <h2 class="card-title">Study summary</h2>
+
+            <div class="callout">
+              <div class="callout__icon" aria-hidden="true">i</div>
+              <div class="callout__body">
+                Brand lift measurement may not have significant/useful results if audiences associated with your selected
+                campaign(s) have low volume while the study is running.
+              </div>
+            </div>
+
+            <div class="summary">
+              <div class="summary__row">
+                <div class="summary__label">Total budget for selected campaigns</div>
+                <div class="summary__value" id="totalBudget">$0.00</div>
+              </div>
+
+              <div class="summary__section">
+                <div class="summary__section-head">
+                  <div class="summary__section-title">Campaigns</div>
+                  <div class="muted" id="selectedCount">0 campaigns</div>
+                </div>
+
+                <div class="chips" id="selectedCampaignChips"></div>
+
+                <div class="muted small" style="margin-top: 10px;">
+                  Only <strong>Eligible</strong> campaigns can be selected.
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
