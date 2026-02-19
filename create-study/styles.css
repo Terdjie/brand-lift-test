@@ -406,7 +406,9 @@ body{
 .survey-section__title{font-weight:700;margin-bottom:10px}
 .choices{margin-top:10px}
 .choices__head{display:flex;gap:12px;align-items:center}
-.choices__list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.choices__list{margin-top:10px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+
+
 .choice-row{
   display:inline-flex;       /* <-- important */
   align-items:center;
