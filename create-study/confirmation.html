@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Study created | Microsoft Advertising (Prototype)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="ms-logo" aria-hidden="true"></div>
+        <div class="topbar__brand">Microsoft Advertising</div>
+        <div class="account-pill">
+          Microsoft <span class="account-pill__sub">• Brand Lift Survey</span>
+        </div>
+      </div>
+      <div class="topbar__center">
+        <div class="search">
+          <span class="search__icon" aria-hidden="true">⌕</span>
+          <input class="search__input" placeholder="Search Microsoft Advertising" />
+        </div>
+      </div>
+      <div class="topbar__right">
+        <button class="icon-btn" title="Help" aria-label="Help">?</button>
+        <button class="icon-btn" title="Notifications" aria-label="Notifications">🔔</button>
+        <div class="user-chip">
+          <span class="user-chip__avatar" aria-hidden="true"></span>
+          <span class="user-chip__email">dterdjman@microsoft.com</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="sidenav" aria-label="Primary navigation">
+        <div class="sidenav__item sidenav__item--active">
+          <span class="sidenav__icon">📈</span>
+          <span class="sidenav__text">Brand Lift</span>
+        </div>
+        <div class="sidenav__spacer"></div>
+        <div class="sidenav__item">
+          <span class="sidenav__icon">⚙️</span>
+          <span class="sidenav__text">Settings</span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="page-header">
+          <h1 class="page-title">Study created</h1>
+          <p class="subtitle">Your Brand Lift Study has been created. Review the configuration below.</p>
+        </div>
+
+        <section class="card">
+          <div class="success">
+            <div class="success__icon" aria-hidden="true">✓</div>
+            <div class="success__text">
+              <div class="success__title" id="confTitle">Brand Lift Study</div>
+              <div class="muted">Saved locally for this prototype.</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="info-card">
+              <div class="info-card__title">Study details</div>
+              <div class="kv">
+                <div class="kv__row"><div class="kv__k">Study name</div><div class="kv__v" id="confName">—</div></div>
+                <div class="kv__row"><div class="kv__k">Start date</div><div class="kv__v" id="confStart">—</div></div>
+                <div class="kv__row"><div class="kv__k">Country</div><div class="kv__v" id="confCountry">—</div></div>
+                <div class="kv__row"><div class="kv__k">Template</div><div class="kv__v" id="confTemplate">—</div></div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-card__title">Campaigns</div>
+              <div class="chips" id="confCampaigns"></div>
+            </div>
+          </div>
+
+          <div class="info-card" style="margin-top:16px;">
+            <div class="info-card__title">Survey</div>
+
+            <div class="survey-summary">
+              <div class="survey-summary__block">
+                <div class="survey-summary__title">Unaided Awareness</div>
+                <div class="survey-summary__q" id="confQUnaided">—</div>
+              </div>
+
+              <div class="survey-summary__block">
+                <div class="survey-summary__title">Product Favorability</div>
+                <div class="survey-summary__q" id="confQFav">—</div>
+                <div class="survey-summary__choices" id="confFavChoices"></div>
+              </div>
+
+              <div class="survey-summary__block">
+                <div class="survey-summary__title">Aided Awareness 1</div>
+                <div class="survey-summary__q" id="confQAided">—</div>
+                <div class="survey-summary__choices" id="confAidedChoices"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-actions">
+            <button class="btn" id="createAnother">Create another</button>
+            <div class="footer-actions__right">
+              <button class="btn btn--primary" id="backToListFromConf">Back to studies</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
