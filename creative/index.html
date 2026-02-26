@@ -19,41 +19,10 @@
         <p class="subtitle">Answer in a few seconds.</p>
 
       <form id="surveyForm" class="form" autocomplete="off">
-
-        <!-- Q1 Multi-select -->
-        <div class="field">
-          <label class="label">
-            1) Which brand lift measurement provider(s) do you use or prefer?
-          </label>
-
-          <div class="options">
-            <label><input type="checkbox" name="q1" value="Kantar"> Kantar</label>
-            <label><input type="checkbox" name="q1" value="Nielsen"> Nielsen</label>
-            <label><input type="checkbox" name="q1" value="Ipsos"> Ipsos</label>
-            <label><input type="checkbox" name="q1" value="Dynata"> Dynata</label>
-            <label><input type="checkbox" name="q1" value="First-party"> First-party platform solution</label>
-            <label><input type="checkbox" name="q1" value="Other"> Other</label>
-          </div>
-        </div>
-
-        <!-- Q2 Single select -->
-        <div class="field">
-          <label class="label">
-            2) What is your preferred approach?
-          </label>
-
-          <div class="options">
-            <label><input type="radio" name="q2" value="First-party"> First-party only</label>
-            <label><input type="radio" name="q2" value="Third-party"> Third-party only</label>
-            <label><input type="radio" name="q2" value="Hybrid"> Hybrid (both)</label>
-            <label><input type="radio" name="q2" value="No preference"> No strong preference</label>
-          </div>
-        </div>
-
         <!-- Q3 Free text -->
         <div class="field">
           <label for="q3" class="label">
-            3) What key outcomes are you looking to measure?
+            1) What is your favorite streaming platform ?
           </label>
           <input
             id="q3"
@@ -61,9 +30,41 @@
             type="text"
             class="input"
             maxlength="120"
-            placeholder="Brand awareness, ad recall, purchase intent…"
+            placeholder="Enter your preferred streaming platform"
           />
         </div>
+
+        <!-- Q1 Multi-select -->
+        <div class="field">
+          <label class="label">
+            2) Which streaming platform are you using?
+          </label>
+
+          <div class="options">
+            <label><input type="checkbox" name="q1" value="Netflix"> Netflix</label>
+            <label><input type="checkbox" name="q1" value="Prime Video"> Prime Video</label>
+            <label><input type="checkbox" name="q1" value="Disney"> Disney+</label>
+            <label><input type="checkbox" name="q1" value="HBO Max"> HBO Max</label>
+            <label><input type="checkbox" name="q1" value="Apple TV"> Apple TV</label>
+            <label><input type="checkbox" name="q1" value="Paramount"> Paramount+</label>
+          </div>
+        </div>
+
+        <!-- Q2 Single select -->
+        <div class="field">
+          <label class="label">
+            3) Which serie are you likely to watch next time?
+          </label>
+
+          <div class="options">
+            <label><input type="radio" name="q2" value="The-Night-Agent"> The Night Agent</label>
+            <label><input type="radio" name="q2" value="Hijack"> Hijack</label>
+            <label><input type="radio" name="q2" value="Fallout"> Fallout</label>
+            <label><input type="radio" name="q2" value="Other"> Other</label>
+          </div>
+        </div>
+
+
 
         <div class="actions">
           <button id="sendBtn" class="btn" type="submit">Send</button>
