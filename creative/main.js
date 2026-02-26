@@ -50,17 +50,19 @@ function sendBeaconGet(paramsObj) {
     // ✅ empêche double submit
     if (sendBtn.disabled) return;
 
-    // Q1 multi-select
-    const q1 = Array.from(document.querySelectorAll('input[name="q1"]:checked'))
+    // Q1 free text
+    const q1 = sanitize(document.getElementById("q1").value);
+    
+    // Q2 multi-select
+    const q2 = Array.from(document.querySelectorAll('input[name="q2"]:checked'))
       .map(el => el.value)
       .join(", ");
 
-    // Q2 single-select
-    const q2El = document.querySelector('input[name="q2"]:checked');
-    const q2 = q2El ? q2El.value : "";
+    // Q3 single-select
+    const q3El = document.querySelector('input[name="q3"]:checked');
+    const q3 = q3El ? q3El.value : "";
 
-    // Q3 free text
-    const q3 = sanitize(document.getElementById("q3").value);
+
 
 
     if (!q1 || !q2 || !q3) {
